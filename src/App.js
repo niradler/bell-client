@@ -2,9 +2,21 @@ import React, { useState, useEffect } from "react";
 
 const winState = 5;
 
+const shuffle = (arr) => {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * i);
+    const temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+
+  return arr;
+};
+
 const App = () => {
   const [game, setGame] = useState({
     start: false,
+    end: false,
   });
   const [turns, setTurns] = useState([]);
   const [players, setPlayers] = useState([
@@ -12,7 +24,7 @@ const App = () => {
       id: 1,
       name: "A",
       deck: [3, 4, 3, 2, 5, 2, 3, 1],
-      ready: true,
+      ready: false,
       lose: false,
       win: false,
     },
@@ -20,25 +32,32 @@ const App = () => {
       id: 2,
       name: "B",
       deck: [1, 2, 2, 3, 1, 4, 3, 4],
-      ready: true,
+      ready: false,
       lose: false,
       win: false,
     },
   ]);
-  const isReady = () => !players.some((player) => !player.ready);
-  const makeReady = () =>
-    setPlayers(players.map((player) => ({ ...player, ready: true })));
+  const isReady = () =>
+    !players.some((player) => !player.ready && !player.lose);
+
+  const makeReady = (id) =>
+    setPlayers(
+      players.map((player) => ({
+        ...player,
+        ready: id && !player.ready ? player.id === id : true,
+      }))
+    );
+
   const makeNotReady = () =>
     setPlayers(players.map((player) => ({ ...player, ready: false })));
+
   const startGame = () => {
-    if (isReady()) {
-      setGame({ ...game, start: true });
-      console.log("game started", game);
-    }
+    setGame({ ...game, start: true });
+    console.log("game started", game);
   };
 
   const stopGame = () => {
-    setGame({ ...game, start: false });
+    setGame({ ...game, end: true });
     makeNotReady();
     console.log("game stopped", game);
   };
@@ -73,7 +92,10 @@ const App = () => {
     } else if (activePlayers === 1) {
       setPlayers(
         players.map((player) => {
-          if (player.deck.length > 0) player.win = true;
+          if (player.deck.length > 0) {
+            player.win = true;
+            stopGame();
+          }
           return player;
         })
       );
@@ -99,14 +121,19 @@ const App = () => {
   const returnDeckAndShuffle = () => {
     let lastWin = turns.length - 1;
     const newTurns = [...turns];
-    for (let i = newTurns.length - 1; i >= 0; i--) {
-      const turn = newTurns[i];
-      if (
-        turn.win === true ||
-        (turn.shuffle === true && i != newTurns.length - 1)
-      ) {
-        lastWin = i;
-        break;
+    let draw = !newTurns.find((turn) => turn.win || turn.shuffle);
+    if (draw) {
+      lastWin = 0;
+    } else {
+      for (let i = newTurns.length - 1; i >= 0; i--) {
+        const turn = newTurns[i];
+        if (
+          turn.win === true ||
+          (turn.shuffle === true && i !== newTurns.length - 1)
+        ) {
+          lastWin = i;
+          break;
+        }
       }
     }
 
@@ -114,8 +141,7 @@ const App = () => {
       .slice(lastWin)
       .map((turn) => turn.cards)
       .flat(1);
-    console.log({ cards, lastWin, newTurns });
-    debugger;
+
     newTurns[newTurns.length - 1].draw = true;
     newTurns[newTurns.length - 1].shuffle = true;
     setTurns(newTurns);
@@ -123,6 +149,7 @@ const App = () => {
       player.deck = cards
         .filter((card) => card.playerId === player.id)
         .map((card) => card.value);
+      player.deck = shuffle(player.deck);
       return player;
     });
 
@@ -154,7 +181,7 @@ const App = () => {
         return player;
       });
       setPlayers(newPlayers);
-      console.log("win");
+      alert(`Player ${playerId} Win!`);
     } else {
       const player = players.find((player) => player.id === playerId);
 
@@ -173,43 +200,94 @@ const App = () => {
       setPlayers(newPlayers);
       newTurns[newTurns.length - 1].draw = true;
       setTurns(newTurns);
-      console.log("penalty");
+      alert("penalty");
     }
   };
 
   useEffect(() => {
-    if (isReady() && game.start) nextTurn();
+    if (isReady() && game.start && !game.end) nextTurn();
     console.log(game, turns, players);
   }, [game, turns, players]);
 
+  const cards =
+    turns.length > 0 &&
+    turns[turns.length - 1].cards.map((card) => (
+      <div className="flex-1 text-center items-center">
+        <div className="flex mb-2">
+          {shuffle(
+            Array(5)
+              .fill()
+              .map((value, index) => index < card.value)
+              .map((green, index) => (
+                <div className="w-1/2">
+                  <span
+                    className={green ? "circle-green" : "circle-red"}
+                  ></span>
+                </div>
+              ))
+          )}
+        </div>
+      </div>
+    ));
+
   return (
-    <div>
+    <div className="container mx-auto">
       <div>
-        <button onClick={() => makeReady()}>Ready</button>
-        <button onClick={() => startGame()}>Start</button>
-        <button onClick={() => stopGame()}>Stop</button>
-        <button onClick={() => ring()}>Ring</button>
+        <button className="btn btn-blue mr-8" onClick={() => makeReady()}>
+          Ready
+        </button>
+        <button className="btn btn-blue mr-8" onClick={() => startGame()}>
+          Start
+        </button>
+        <button className="btn btn-blue mr-8" onClick={() => stopGame()}>
+          Stop
+        </button>
+        <button className="btn btn-blue" onClick={() => ring()}>
+          Ring
+        </button>
+      </div>
+      <div className="flex">
+        {players.map((player) => (
+          <div className="flex-1 text-center items-center">
+            <span
+              className="circle-red leading-p4"
+              onClick={() => makeReady(player.id)}
+            >
+              {player.ready ? "Ready" : "Not Ready"}
+            </span>
+            <span
+              className="circle-green leading-p4"
+              onClick={() => ring(player.id)}
+            >
+              Ring
+            </span>
+            <div>Player {player.id}</div>
+          </div>
+        ))}
       </div>
       <div>
         <h3>state</h3>
         <ul>
+          <li>
+            {game.start && !game.end ? "game running." : "game not running."}
+          </li>
           {players.map((player) => (
             <li>
-              id:{player.id},cards:{JSON.stringify(player.deck)},win:
-              {player.win && "You just win"},lose:
-              {player.lose && "You just lose"}
+              id:{player.id}, ready:{player.ready ? "true" : "false"}, cards:
+              {JSON.stringify(player.deck)}, win:
+              {player.win ? "yes" : "no"}, lose:
+              {player.lose ? "yes" : "no"}
             </li>
           ))}
         </ul>
       </div>
       <div>
         <h3>Current Turn</h3>
-        <ul>
-          {turns.length > 0 &&
-            turns[turns.length - 1].cards.map((card) => (
-              <li key={card.playerId}>{card.value}</li>
-            ))}
-        </ul>
+        <div className="flex">
+          {cards[0]}
+          <br />
+          {cards[1]}
+        </div>
       </div>
     </div>
   );
