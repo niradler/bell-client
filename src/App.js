@@ -52,7 +52,7 @@ const GameView = ({ game }) => {
           className="btn btn-blue mr-8"
           onClick={() => game.readyPlayer()}
         >
-          Ready
+          All Ready
         </button>
         <button className="btn btn-blue mr-8" onClick={() => game.start()}>
           Start
@@ -115,9 +115,24 @@ const GameView = ({ game }) => {
 };
 
 const App = () => {
-  const game = new Game(2);
+  const [numOfPlayers, setNumOfPlayers] = useState(0);
 
-  return <GameView game={game} />;
+  return (
+    <div>
+      {numOfPlayers > 0 ? (
+        <GameView game={new Game(numOfPlayers)} />
+      ) : (
+        <div>
+          <h3>How many players?</h3>
+          <input
+            className="bg-white focus:outline-none focus:shadow-outline border border-gray-300 rounded-lg py-2 px-4 block appearance-none leading-normal"
+            type="number"
+            onChange={(e) => setNumOfPlayers(Number(e.target.value))}
+          />
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default App;
