@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/bell-client/precache-manifest.42ff4566846fbfdf9f9d5b527b9a05f5.js"
+  "/bell-client/precache-manifest.4206964ff11084a977c2ce9447fa0884.js"
 );
 
 self.addEventListener('message', (event) => {

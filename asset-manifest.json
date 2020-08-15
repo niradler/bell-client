@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/bell-client/static/css/main.e16a88bc.chunk.css",
-    "main.js": "/bell-client/static/js/main.52a9ec69.chunk.js",
-    "main.js.map": "/bell-client/static/js/main.52a9ec69.chunk.js.map",
+    "main.js": "/bell-client/static/js/main.a242b7da.chunk.js",
+    "main.js.map": "/bell-client/static/js/main.a242b7da.chunk.js.map",
     "runtime-main.js": "/bell-client/static/js/runtime-main.7da48375.js",
     "runtime-main.js.map": "/bell-client/static/js/runtime-main.7da48375.js.map",
-    "static/js/2.e3b2587e.chunk.js": "/bell-client/static/js/2.e3b2587e.chunk.js",
-    "static/js/2.e3b2587e.chunk.js.map": "/bell-client/static/js/2.e3b2587e.chunk.js.map",
+    "static/js/2.08b65b4d.chunk.js": "/bell-client/static/js/2.08b65b4d.chunk.js",
+    "static/js/2.08b65b4d.chunk.js.map": "/bell-client/static/js/2.08b65b4d.chunk.js.map",
     "index.html": "/bell-client/index.html",
-    "precache-manifest.42ff4566846fbfdf9f9d5b527b9a05f5.js": "/bell-client/precache-manifest.42ff4566846fbfdf9f9d5b527b9a05f5.js",
+    "precache-manifest.4206964ff11084a977c2ce9447fa0884.js": "/bell-client/precache-manifest.4206964ff11084a977c2ce9447fa0884.js",
     "service-worker.js": "/bell-client/service-worker.js",
     "static/css/main.e16a88bc.chunk.css.map": "/bell-client/static/css/main.e16a88bc.chunk.css.map",
-    "static/js/2.e3b2587e.chunk.js.LICENSE.txt": "/bell-client/static/js/2.e3b2587e.chunk.js.LICENSE.txt"
+    "static/js/2.08b65b4d.chunk.js.LICENSE.txt": "/bell-client/static/js/2.08b65b4d.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.7da48375.js",
-    "static/js/2.e3b2587e.chunk.js",
+    "static/js/2.08b65b4d.chunk.js",
     "static/css/main.e16a88bc.chunk.css",
-    "static/js/main.52a9ec69.chunk.js"
+    "static/js/main.a242b7da.chunk.js"
   ]
 }

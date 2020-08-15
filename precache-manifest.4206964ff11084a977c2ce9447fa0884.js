@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "8a703be145a924473a271400a1a7c0e9",
+    "revision": "66b421a2aa603dacd025a34857bf8010",
     "url": "/bell-client/index.html"
   },
   {
-    "revision": "b98cefce17051947a0a3",
+    "revision": "741737699791a913375c",
     "url": "/bell-client/static/css/main.e16a88bc.chunk.css"
   },
   {
-    "revision": "06a3ad4ebaf14b1c2b74",
-    "url": "/bell-client/static/js/2.e3b2587e.chunk.js"
+    "revision": "f4ea21069689402fdf83",
+    "url": "/bell-client/static/js/2.08b65b4d.chunk.js"
   },
   {
     "revision": "e88a3e95b5364d46e95b35ae8c0dc27d",
-    "url": "/bell-client/static/js/2.e3b2587e.chunk.js.LICENSE.txt"
+    "url": "/bell-client/static/js/2.08b65b4d.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "b98cefce17051947a0a3",
-    "url": "/bell-client/static/js/main.52a9ec69.chunk.js"
+    "revision": "741737699791a913375c",
+    "url": "/bell-client/static/js/main.a242b7da.chunk.js"
   },
   {
     "revision": "46a055212b0f4518ea16",
