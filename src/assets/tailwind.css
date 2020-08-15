@@ -15,23 +15,3 @@
 .btn-blue:hover {
   @apply bg-blue-700;
 }
-
-.circle-red {
-  background-color: red;
-  height: 75px;
-  width: 75px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.circle-green {
-  background-color: green;
-  height: 75px;
-  width: 75px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.leading-p4 {
-  line-height: 4rem;
-}

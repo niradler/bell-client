@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import "./App.css";
 const winState = 5;
 
 const shuffle = (arr) => {
@@ -23,7 +23,7 @@ const App = () => {
     {
       id: 1,
       name: "A",
-      deck: [3, 4, 3, 2, 5, 2, 3, 1],
+      deck: [3, 4, 3, 2, 5, 2, 3, 1, 0],
       ready: false,
       lose: false,
       win: false,
@@ -31,7 +31,7 @@ const App = () => {
     {
       id: 2,
       name: "B",
-      deck: [1, 2, 2, 3, 1, 4, 3, 4],
+      deck: [1, 2, 2, 3, 1, 4, 3, 4, 0],
       ready: false,
       lose: false,
       win: false,
@@ -62,44 +62,28 @@ const App = () => {
     console.log("game stopped", game);
   };
 
-  const nextTurn = () => {
-    setTurns([
-      ...turns,
-      {
-        win: false,
-        draw: true,
-        cards: players.map((player) => ({
-          playerId: player.id,
-          value: player.deck.length > 0 ? player.deck[0] : 0,
-        })),
-      },
-    ]);
-
-    setPlayers(
-      players.map((player) => ({
-        ...player,
-        lose: player.deck.length < 2 ? true : false,
-        deck: player.deck.slice(1),
-        ready: false,
-      }))
-    );
-
+  const calcGameState = () => {
     const activePlayers = players.filter((player) => player.deck.length > 0)
       .length;
     console.log({ activePlayers, players });
+    const lastTurnWin = turns[turns.length - 1].win;
     if (activePlayers === 0) {
       returnDeckAndShuffle();
-    } else if (activePlayers === 1) {
-      setPlayers(
-        players.map((player) => {
-          if (player.deck.length > 0) {
-            player.win = true;
-            stopGame();
-          }
-          return player;
-        })
-      );
-    } else {
+    } else if (activePlayers === 1 && lastTurnWin) {
+      let hasWinner = false;
+      const newPlayers = players.map((player) => {
+        if (player.deck.length > 0 && lastTurnWin) {
+          player.win = true;
+          hasWinner = true;
+        }
+        return player;
+      });
+
+      if (hasWinner) {
+        stopGame();
+        setPlayers(newPlayers);
+      }
+    } else if (lastTurnWin) {
       const newPlayers = [...players];
       let hasLosers = false;
       newPlayers.map((player) => {
@@ -115,7 +99,39 @@ const App = () => {
           newPlayers.length;
         if (!allLosers) setPlayers(newPlayers);
       }
+    } else if (
+      drawTurns.length > 0 &&
+      !lastTurnWin &&
+      players.find((player) => player.deck.length === 0 && !player.lose)
+    ) {
+      returnDeckAndShuffle();
     }
+  };
+
+  const nextTurn = () => {
+    if (!isReady() || !game.start || game.end) return;
+
+    if (turns.length > 0) calcGameState();
+
+    setTurns([
+      ...turns,
+      {
+        win: false,
+        draw: true,
+        cards: players.map((player) => ({
+          playerId: player.id,
+          value: player.deck.length > 0 ? player.deck[0] : 0,
+        })),
+      },
+    ]);
+
+    setPlayers(
+      players.map((player) => ({
+        ...player,
+        deck: player.deck.slice(1),
+        ready: false,
+      }))
+    );
   };
 
   const returnDeckAndShuffle = () => {
@@ -205,33 +221,35 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (isReady() && game.start && !game.end) nextTurn();
-    console.log(game, turns, players);
+    nextTurn();
+    console.log({ game, turns, players });
   }, [game, turns, players]);
 
-  const cards =
-    turns.length > 0 &&
-    turns[turns.length - 1].cards.map((card) => (
-      <div className="flex-1 text-center items-center">
-        <div className="flex mb-2">
-          {shuffle(
-            Array(5)
-              .fill()
-              .map((value, index) => index < card.value)
-              .map((green, index) => (
-                <div className="w-1/2">
-                  <span
-                    className={green ? "circle-green" : "circle-red"}
-                  ></span>
-                </div>
-              ))
-          )}
-        </div>
-      </div>
-    ));
+  let cards = [];
+  if (game.start && !game.end && turns.length > 0) {
+    cards = turns[turns.length - 1].cards.map((card) =>
+      shuffle(
+        Array(5)
+          .fill()
+          .map((value, index) => index < card.value)
+          .map((green, index) => (
+            <span
+              className={green ? "circle bg-green-600" : "circle bg-red-600"}
+            ></span>
+          ))
+      )
+    );
+  }
+  const drawTurns = turns.reduce((drawTurns, turn) => {
+    if (turn.win || turn.shuffle) drawTurns = [];
+    else if (turn.draw) drawTurns = [...drawTurns, turn];
+
+    return drawTurns;
+  }, []);
 
   return (
     <div className="container mx-auto">
+      <h2>{game.start && !game.end ? "game running." : "game not running."}</h2>
       <div>
         <button className="btn btn-blue mr-8" onClick={() => makeReady()}>
           Ready
@@ -250,43 +268,38 @@ const App = () => {
         {players.map((player) => (
           <div className="flex-1 text-center items-center">
             <span
-              className="circle-red leading-p4"
+              className="circle bg-red-600 leading-p4"
               onClick={() => makeReady(player.id)}
             >
               {player.ready ? "Ready" : "Not Ready"}
             </span>
             <span
-              className="circle-green leading-p4"
+              className="circle bg-green-600 leading-p4"
               onClick={() => ring(player.id)}
             >
               Ring
             </span>
-            <div>Player {player.id}</div>
+            <div>
+              Player {player.id} (cards:{player.deck.length}) <br />
+              {player.win ? "Winner!" : player.lose ? "Loser!" : ""}
+            </div>
           </div>
         ))}
       </div>
       <div>
-        <h3>state</h3>
-        <ul>
-          <li>
-            {game.start && !game.end ? "game running." : "game not running."}
-          </li>
-          {players.map((player) => (
-            <li>
-              id:{player.id}, ready:{player.ready ? "true" : "false"}, cards:
-              {JSON.stringify(player.deck)}, win:
-              {player.win ? "yes" : "no"}, lose:
-              {player.lose ? "yes" : "no"}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <h3>Current Turn</h3>
+        <h3>Board ({drawTurns.length})</h3>
         <div className="flex">
-          {cards[0]}
-          <br />
-          {cards[1]}
+          {cards.map((card) => (
+            <div className="flex-1 text-center items-center">
+              <div className="border border-gray-600 w-1/2">
+                {card.slice(0, 2)}
+                <br />
+                {card[2]}
+                <br />
+                {card.slice(3)}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
