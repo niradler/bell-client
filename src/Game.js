@@ -182,15 +182,25 @@ class Game {
       }
     }
 
+    const cards = this.players.map((player) => ({
+      playerId: player.id,
+      value: player.deck.length > 0 ? player.deck[0] : 0,
+      classes: shuffle(
+        Array(5)
+          .fill()
+          .map((value, index) => index < (player.deck[0] ? player.deck[0] : 0))
+          .map((green, index) =>
+            green ? "circle bg-green-600" : "circle bg-red-600"
+          )
+      ),
+    }));
+
     this.turns = [
       ...this.turns,
       {
         win: false,
         draw: true,
-        cards: this.players.map((player) => ({
-          playerId: player.id,
-          value: player.deck.length > 0 ? player.deck[0] : 0,
-        })),
+        cards,
       },
     ];
 
@@ -259,6 +269,7 @@ class Game {
       });
 
       this.turns[this.turns.length - 1].draw = true;
+      this.turns[this.turns.length - 1].penalty = true;
       this.logger(`this turn is a draw.`);
     }
 
