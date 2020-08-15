@@ -16,8 +16,9 @@ const shuffle = (arr) => {
 };
 
 class Game {
-  constructor(numOfPlayers, deckSize, debug) {
+  constructor(numOfPlayers, deckSize, { debug, setter } = {}) {
     this.debug = debug;
+    this.setter = setter;
     this.deckOptions = defaultOptions.deckOptions;
     this.log = [];
     this.turns = [];
@@ -50,14 +51,32 @@ class Game {
     );
   }
 
+  sync() {
+    const state = {
+      start: this._start,
+      end: this._end,
+      players: this.players,
+      turns: this.turns,
+    };
+
+    if (this.debug) {
+      console.log("state", state);
+      console.log("game log:", this.log);
+    }
+
+    if (this.setter) this.setter(state);
+  }
+
   start() {
     this.logger("start");
     this._start = true;
+    this.sync();
   }
 
   end() {
     this.logger("end");
     this._end = true;
+    this.sync();
   }
 
   createPlayer(id) {
@@ -75,21 +94,24 @@ class Game {
   }
 
   readyPlayer(id) {
-    this.logger("readyPlayer");
+    this.logger("readyPlayer:" + id);
     this.players = this.players.map((player) => ({
       ...player,
       ready: id && !player.ready ? player.id === id : true,
     }));
+    this.sync();
   }
 
   allNotReady() {
     this.logger("allNotReady");
     this.players = this.players.map((player) => ({ ...player, ready: false }));
+    this.sync();
   }
 
   isReady() {
-    this.logger("isReady");
-    return !this.players.some((player) => !player.ready && !player.lose);
+    const ready = !this.players.some((player) => !player.ready && !player.lose);
+    this.logger("isReady:" + ready);
+    return ready;
   }
 
   returnDeckAndShuffle() {
@@ -102,32 +124,34 @@ class Game {
     } else {
       for (let i = newTurns.length - 1; i >= 0; i--) {
         const turn = newTurns[i];
-        if (
-          turn.win === true ||
-          (turn.shuffle === true && i !== newTurns.length - 1)
-        ) {
+        if (turn.win === true) {
           lastWin = i;
+          break;
+        }
+        if (turn.shuffle === true && i < newTurns.length - 1) {
+          lastWin = i + 1;
           break;
         }
       }
     }
-
     const cards = newTurns
       .slice(lastWin)
       .map((turn) => turn.cards)
       .flat(1);
-
+    console.log({ cards, lastWin });
     newTurns[newTurns.length - 1].draw = true;
     newTurns[newTurns.length - 1].shuffle = true;
     this.turns = newTurns;
     const newPlayers = this.players.map((player) => {
-      player.deck = cards
+      const cardsToAdd = cards
         .filter((card) => card.playerId === player.id)
         .map((card) => card.value);
+      player.deck = [...player.deck, ...cardsToAdd];
       player.deck = shuffle(player.deck);
       return player;
     });
     this.players = newPlayers;
+    this.sync();
   }
 
   getLastDrawTurns() {
@@ -175,6 +199,7 @@ class Game {
       deck: player.deck.slice(1),
       ready: false,
     }));
+    this.sync();
   }
 
   ring(playerId) {
@@ -190,6 +215,7 @@ class Game {
       if (newTurns[newTurns.length - 1].win !== false) return;
       newTurns[newTurns.length - 1].win = playerId;
       newTurns[newTurns.length - 1].draw = false;
+      this.logger(`player ${playerId} win this turn.`);
       this.turns = newTurns;
 
       const otherPlayersHasCards = newPlayers.some(
@@ -205,16 +231,17 @@ class Game {
           ];
           if (!otherPlayersHasCards) {
             player.win = true;
+            this.logger(`player ${player.id} win.`);
           }
         } else if (!otherPlayersHasCards) {
           player.lose = true;
+          this.logger(`player ${player.id} lose.`);
         }
 
         return player;
       });
 
       this.players = newPlayers;
-      return true;
     } else {
       const player = newPlayers.find((player) => player.id === playerId);
 
@@ -232,9 +259,11 @@ class Game {
       });
 
       this.turns[this.turns.length - 1].draw = true;
-      return false;
+      this.logger(`this turn is a draw.`);
     }
+
+    this.sync();
   }
 }
 
-module.exports = Game;
+export default Game;

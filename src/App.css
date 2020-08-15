@@ -8,3 +8,7 @@
 .leading-p4 {
   line-height: 4rem;
 }
+
+.log-h {
+  max-height: 300px;
+}

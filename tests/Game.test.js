@@ -1,7 +1,7 @@
 const Game = require("../src/Game");
 const numOfPlayers = 2;
 const deckSize = 4;
-const game = new Game(numOfPlayers, deckSize, true);
+const game = new Game(numOfPlayers, deckSize, { debug: true });
 describe("Game Test", () => {
   beforeAll(() => {
     game.start();
