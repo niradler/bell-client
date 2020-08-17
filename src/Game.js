@@ -15,6 +15,19 @@ const shuffle = (arr) => {
   return arr;
 };
 
+const genGameId = (num) =>
+  Number(
+    Array(num)
+      .fill(0)
+      .map((v, i) => {
+        let rnd = Math.floor(Math.random() * 10);
+        if (rnd === 0 && i === 0) rnd = 1;
+
+        return rnd;
+      })
+      .join("")
+  );
+
 class Game {
   constructor(numOfPlayers, deckSize, { debug, setter } = {}) {
     this.debug = debug;
@@ -26,6 +39,7 @@ class Game {
     this.logger("constructor");
     this._start = false;
     this._end = false;
+    this.id = genGameId();
     this.numOfPlayers = numOfPlayers;
     this.deckSize = deckSize || defaultOptions.deckSize;
     this.deck = this.debug
@@ -167,12 +181,16 @@ class Game {
     return drawTurns;
   }
 
+  getLastTurn() {
+    return this.turns[this.turns.length - 1];
+  }
+
   nextTurn() {
     if (!this.isReady() || !this._start || this._end) return;
 
     this.logger("nextTurn");
     if (this.turns.length > 0) {
-      const lastTurnWin = this.turns[this.turns.length - 1].win;
+      const lastTurnWin = this.getLastTurn().win;
       if (
         this.getLastDrawTurns().length > 0 &&
         !lastTurnWin &&

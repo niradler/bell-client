@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Game from "./Game";
 import Bell from "./assets/bell.png";
 import GameView from "./GameView";
@@ -10,13 +10,13 @@ const App = () => {
   const [numOfPlayers, setNumOfPlayers] = useState(0);
   const [start, setStart] = useState(false);
 
-  const startGame = () => {
+  const startGame = (type) => {
     if (numOfPlayers > 0) {
       if (!game) {
         game = new Game(numOfPlayers);
         game.start();
       }
-      setStart(true);
+      setStart(type);
     } else alert("Please fill number of players.");
   };
 
@@ -37,8 +37,17 @@ const App = () => {
               onChange={(e) => setNumOfPlayers(Number(e.target.value))}
             />
             <br />
-            <button className="btn btn-blue mr-8" onClick={() => startGame()}>
-              Start
+            <button
+              className="btn btn-blue mr-8"
+              onClick={() => startGame("local")}
+            >
+              Local
+            </button>
+            <button
+              className="btn btn-blue mr-8"
+              onClick={() => startGame("multi")}
+            >
+              MultiPlayer
             </button>
           </div>
         </div>
